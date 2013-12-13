@@ -24,7 +24,6 @@ import tweepy
 import urllib2
 from secrets import *
 from bs4 import BeautifulSoup
-from topia.termextract import tag
 from time import gmtime, strftime
 
 tagger = tag.Tagger()
@@ -61,8 +60,8 @@ def get():
             if count_caps(h_split) >= len(h_split) - 3:
                 continue
 
-            # Skip anything too offensive
-            if not tact(headline):
+            # Skip anything NOT too offensive
+            if tact(headline):
                 continue
 
             # Remove attribution string
@@ -77,27 +76,27 @@ def get():
 
 def process(headline):
     headline = hparser.unescape(headline)
-    tagged = tagger(headline)
-    for i, word in enumerate(tagged):
-        # Avoid having two "cybers" in a row
-        if is_replaceable(word) and not is_replaceable(tagged[i-1]):
-            headline = headline.replace(" " + word[0], " cyber" + word[0], 1)
+#    tagged = tagger(headline)
+#    for i, word in enumerate(tagged):
+#        # Avoid having two "cybers" in a row
+#        if is_replaceable(word) and not is_replaceable(tagged[i-1]):
+#            headline = headline.replace(" " + word[0], " cyber" + word[0], 1)
 
     # Don't tweet anything that's too long
     if len(headline) > 140:
         return False
 
     # Don't tweet anything where a replacement hasn't been made
-    if "cyber" not in headline:
-        return False
-    else:
-        return tweet(headline)
+#    if "cyber" not in headline:
+#        return False
+#    else:
+     return tweet(headline)
 
 def tweet(headline):
     auth = tweepy.OAuthHandler(C_KEY, C_SECRET)
     auth.set_access_token(A_TOKEN, A_TOKEN_SECRET)
     api = tweepy.API(auth)
-    tweets = api.user_timeline('CyberPrefixer')
+    tweets = api.user_timeline('MorbidPrefixer')
 
     # Check that we haven't tweeted this before
     for tweet in tweets:
@@ -105,7 +104,7 @@ def tweet(headline):
             return False
 
     # Log tweet to file
-    f = open("cyberprefixer.log", 'a')
+    f = open("morbidprefixer.log", 'a')
     t = strftime("%d %b %Y %H:%M:%S", gmtime())
     f.write("\n" + t + " " + headline)
     f.close()
